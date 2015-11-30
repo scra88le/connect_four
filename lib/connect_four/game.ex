@@ -17,4 +17,20 @@ defmodule ConnectFour.Game do
   	ConnectFour.Board.print
   end
 
+  #CLIENT API
+  def move(player,column) do
+    case GenServer.call(@registered_name, {:move, player, column}) do
+      :ok -> "Successful move for #{player} player in column #{column}"
+    end
+  end
+
+  #SERVER CALLBACKS
+  def handle_call({:move, player, column}, _from, state) do
+    case ConnectFour.Board.place_token(player, column) do
+      {:move_accepted} ->
+        newstate = Map.put(state, :last_moved, player) # 1
+        {:reply, :ok, newstate}                        # 2
+    end
+  end
+
 end
